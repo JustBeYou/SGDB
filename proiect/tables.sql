@@ -1,10 +1,42 @@
---- Ticker
-create table ticker (
-    name varchar2(5) not null,
-    total_shares number(15) default 0 not null,
+--- Security
+create table security (
+    ticker varchar2(5) not null,
+    name varchar2(256) not null,
+    total_shares number(15) default 0 not null check (total_shares > 0),
     last_price number(15) default 0 not null,
     
-    constraint ticker_pk primary key (name)
+    constraint security_pk primary key (ticker)
+);
+
+create table stock_security (
+    ticker varchar2(5) not null,
+    constraint stock_security_pk primary key (ticker),
+    constraint stock_security_fk
+        foreign key (ticker)
+        references security(ticker),
+    
+    type varchar2(16) not null check (type in ('COMMON', 'PREFERRED')),
+    pays_dividents char default 0 not null check (pays_dividents in (0, 1))
+);
+
+create table fund_security (
+    ticker varchar2(5) not null,
+    constraint fund_security_pk primary key (ticker),
+    constraint fund_security_fk
+        foreign key (ticker)
+        references security(ticker),
+    
+    type varchar2(16) not null check (type in ('HEDGE', 'MUTUAL', 'BOND'))
+);
+
+create table bond_security (
+    ticker varchar2(5) not null,
+    constraint bond_security_pk primary key (ticker),
+    constraint bond_security_fk
+        foreign key (ticker)
+        references security(ticker),
+    
+    interest_rate number(2, 4) not null check (interest_rate >= 0.01)
 );
 
 --- Holder
@@ -45,20 +77,20 @@ begin
 end;
 /
 
---- account Owns ticker
+--- account Owns security
 create table own (
     account_id integer not null,
-    ticker_name varchar2(5) not null,
+    ticker varchar2(5) not null,
     amount number(15) not null,
     
-    constraint own_pk primary key (account_id, ticker_name),
+    constraint own_pk primary key (account_id, ticker),
     
     constraint owner_fk
         foreign key (account_id)
         references account(id),
     constraint owned_fk
-        foreign key (ticker_name)
-        references ticker(name)
+        foreign key (ticker)
+        references security(ticker)
 );
 
 --- Quotation
@@ -68,7 +100,7 @@ create table quotation (
     type varchar2(3) not null check (type in ('ASK', 'BID')),
     fulfilled char default 0 not null check (fulfilled in (0, 1)),
 
-    ticker_name varchar2(5) not null,
+    ticker varchar2(5) not null,
     account_id integer not null,
     
     amount number(15) not null,
@@ -80,8 +112,8 @@ create table quotation (
         foreign key (account_id)
         references account(id),
     constraint asset_fk
-        foreign key (ticker_name)
-        references ticker(name)
+        foreign key (ticker)
+        references security(ticker)
 );
 
 create sequence quotation_ids start with 1;
@@ -105,7 +137,7 @@ create table trade (
     market_maker_account_id integer not null,
     time timestamp with time zone,
     
-    ticker_name varchar2(5) not null,
+    ticker varchar2(5) not null,
     amount number(15) not null,
     price number(15) not null,
     
@@ -129,6 +161,6 @@ create table trade (
         references account(id),
     
     constraint traded_asset_fk
-        foreign key (ticker_name)
-        references ticker(name)
+        foreign key (ticker)
+        references security(ticker)
 );
