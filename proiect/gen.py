@@ -41,7 +41,7 @@ def random_name(n = 4):
 
 dollar_to_cents = 100
 
-# holders - accounts - tickers - owns
+# holders - accounts - securitys - owns
 def gen_hato(n, m):
     holders_values = [[
             ''.join([str(randint(0, 9)) for _ in range(9)]),
@@ -63,26 +63,26 @@ def gen_hato(n, m):
         ])
     stock_exchange_id = len(holders_values)
 
-    ticker_names = list(product(ascii_uppercase, repeat = 3))
-    shuffle(ticker_names)
-    tickers_values = [[
-            ''.join(ticker_names.pop()),
+    securitys_names = [random_name(5) for i in range(m)]
+    securitys_values = [[
+            ''.join([x for j, x in enumerate(securitys_names[i]) if j == 0 or securitys_names[i][j - 1] == ' ']),
+            securitys_names[i],
             randint(10**3, 10**7),
             randint(1, 200) * dollar_to_cents,
         ] for i in range(m)]
 
     owns = [[
             stock_exchange_id,
-            tickers_values[i][0],
-            0,
+            securitys_values[i][0],
+            1,
         ] for i in range(m)]
 
     asks = [[
             'ASK',
-            tickers_values[i][0],
+            securitys_values[i][0],
             stock_exchange_id,
-            tickers_values[i][1],
-            tickers_values[i][2],
+            securitys_values[i][2] - 1,
+            securitys_values[i][3],
         ] for i in range(m)]
 
     s = [
@@ -98,11 +98,11 @@ def gen_hato(n, m):
 
             insert('account', ['holder_id', 'capital'], [[holders_values[i][0], randint(10**3, 10**7) * dollar_to_cents] for i in range(n + 1)]),
 
-            insert('ticker', ['name', 'total_shares', 'last_price'], tickers_values),
+            insert('security', ['ticker', 'name', 'total_shares', 'last_price'], securitys_values),
 
-            insert('own', ['account_id', 'ticker_name', 'amount'], owns),
+            insert('own', ['account_id', 'ticker', 'amount'], owns),
 
-            insert('quotation', ['type', 'ticker_name', 'account_id', 'amount', 'price'], asks)
+            insert('quotation', ['type', 'ticker', 'account_id', 'amount', 'price'], asks)
         ]
 
     return '\n\n'.join(s)
