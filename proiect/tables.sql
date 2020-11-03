@@ -99,6 +99,7 @@ create table quotation (
 
     type varchar2(3) not null check (type in ('ASK', 'BID')),
     fulfilled char default 0 not null check (fulfilled in (0, 1)),
+    deleted char default 0 not null check (deleted in (0, 1)),
 
     ticker varchar2(5) not null,
     account_id integer not null,
