@@ -52,7 +52,7 @@ def gen_hato(n, m):
             'company{}@email.com'.format(i),
             '+99-222-{}'.format(i),
         ] for i in range(n)]
-    holders_values.append([
+    holders_values.insert(0, [
         '123456789',
         'FAKE STOCK EXCHANGE LTD.',
         'COMPANY',
@@ -61,13 +61,14 @@ def gen_hato(n, m):
         'michaeljackson@obama.gov',
         '07222222'
         ])
-    stock_exchange_id = len(holders_values)
+    stock_exchange_id = 1
 
     securitys_names = [random_name(5) for i in range(m)]
     securitys_values = [[
             ''.join([x for j, x in enumerate(securitys_names[i]) if j == 0 or securitys_names[i][j - 1] == ' ']),
             securitys_names[i],
             randint(10**3, 10**7),
+            randint(1, 200) * dollar_to_cents,
             randint(1, 200) * dollar_to_cents,
             choice(['FUND_SECURITY', 'STOCK_SECURITY', 'BOND_SECURITY'])
         ] for i in range(m)]
@@ -84,12 +85,13 @@ def gen_hato(n, m):
             stock_exchange_id,
             securitys_values[i][2] - 1,
             securitys_values[i][3],
+            securitys_values[i][2] - 1,
         ] for i in range(m)]
 
 
-    stocks = [[x[0], choice(['COMMON', 'PREFERRED']), choice([0, 1])] for x in securitys_values if x[4] == 'STOCK_SECURITY']
-    funds = [[x[0], choice(['HEDGE', 'MUTUAL', 'BOND'])] for x in securitys_values if x[4] == 'FUND_SECURITY']
-    bonds = [[x[0], choice([0.05, 0.09, 0.1, 0.04])] for x in securitys_values if x[4] == 'BOND_SECURITY']
+    stocks = [[x[0], choice(['COMMON', 'PREFERRED']), choice([0, 1])] for x in securitys_values if x[-1] == 'STOCK_SECURITY']
+    funds = [[x[0], choice(['HEDGE', 'MUTUAL', 'BOND'])] for x in securitys_values if x[-1] == 'FUND_SECURITY']
+    bonds = [[x[0], choice([0.05, 0.09, 0.1, 0.04])] for x in securitys_values if x[-1] == 'BOND_SECURITY']
 
     s = [
             insert('holder', [
@@ -102,13 +104,15 @@ def gen_hato(n, m):
             'phone',
         ] , holders_values),
 
-            insert('account', ['holder_id', 'capital'], [[holders_values[i][0], randint(10**3, 10**7) * dollar_to_cents] for i in range(n + 1)]),
+            insert('account', ['holder_id', 'capital'], [[holders_values[i][0],
+                randint(10**3, 10**7) * dollar_to_cents
+                ] for i in range(n + 1)]),
 
-            insert('security', ['ticker', 'name', 'total_shares', 'last_price', 'type'], securitys_values),
+            insert('security', ['ticker', 'name', 'total_shares', 'last_ask_price','last_bid_price', 'type'], securitys_values),
 
             insert('own', ['account_id', 'ticker', 'amount'], owns),
 
-            insert('quotation', ['type', 'ticker', 'account_id', 'amount', 'price'], asks),
+            insert('quotation', ['type', 'ticker', 'account_id', 'amount', 'price', 'remaining'], asks),
 
             insert('stock_security', ['ticker','type', 'pays_dividents'], stocks) if len(stocks) else "",
             insert('bond_security', ['ticker','interest_rate'], bonds) if len(bonds) else "",
@@ -121,7 +125,7 @@ def gen_hato(n, m):
 from sys import argv
 
 argc = len(argv)
-n = int(argv[1]) if argc > 1 else 5
-m = int(argv[2]) if argc > 2 else 10
+n = int(argv[1]) if argc > 1 else 10
+m = int(argv[2]) if argc > 2 else 30
 
 print (gen_hato(n, m))

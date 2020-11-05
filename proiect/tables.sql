@@ -10,11 +10,12 @@
 
 --- Security
 create table security (
-    ticker       /*abbreviation*/    varchar2(10) not null,
-    name         /*long_thing_name*/ varchar2(256) not null,
-    total_shares /*quantity*/        number(15) default 0 not null check (total_shares > 0),
-    last_price   /*quantity*/        number(15) default 0 not null,
-    type         /*type_string*/     varchar2(16) not null,
+    ticker         /*abbreviation*/    varchar2(10) not null,
+    name           /*long_thing_name*/ varchar2(256) not null,
+    total_shares   /*quantity*/        number(15) default 0 not null check (total_shares > 0),
+    last_ask_price /*quantity*/        number(15) default 0 not null,
+    last_bid_price /*quantity*/        number(15) default 0 not null,
+    type           /*type_string*/     varchar2(16) not null,
     
     constraint security_pk primary key (ticker)
 );
@@ -83,8 +84,9 @@ create table quotation (
     ticker     /*abbreviation*/ varchar2(10) not null,
     account_id /*id*/           integer not null,
     
-    amount /*quantity*/ number(15) not null,
-    price  /*quantity*/ number(15) not null,
+    amount    /*quantity*/ number(15) not null,
+    remaining /*quantity*/ number(15) not null,
+    price     /*quantity*/ number(15) not null,
     
     constraint quotation_pk primary key (id),
     
@@ -118,9 +120,10 @@ create table trade (
     market_maker_account_id /*id*/ integer not null,
     time timestamp with time zone,
     
-    ticker /*abbreviation*/ varchar2(10) not null,
-    amount /*quantity*/     number(15) not null,
-    price  /*quantity*/     number(15) not null,
+    ticker       /*abbreviation*/ varchar2(10) not null,
+    amount       /*quantity*/     number(15) not null,
+    price        /*quantity*/     number(15) not null,
+    spread_price /*quantity*/     number(15) not null,
     
     constraint trade_pk primary key (id, ask_id, bid_id),
     
