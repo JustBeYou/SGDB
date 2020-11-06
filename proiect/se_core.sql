@@ -292,6 +292,7 @@ CREATE OR REPLACE PACKAGE BODY se_core AS
         fee        se_types.percentage;
         fee_factor se_types.percentage;
         volume     se_types.quantity;
+        acc        account%rowtype;
     BEGIN
         -- fee to pay = standard security fee increased by threshold level
         thresholds := se_types.thresholds_array(
@@ -303,7 +304,11 @@ CREATE OR REPLACE PACKAGE BODY se_core AS
             threshold_fee_pair(se_utils.dollars_to_points(100000), 0.1)
         );
         
-        SELECT SUM((price + spread_price) * amount) INTO volume
+        SELECT * INTO acc
+        FROM account a
+        WHERE a.id = acc_id;
+        
+        SELECT COALESCE(SUM((price + spread_price) * amount), 0) INTO volume
         FROM (
             SELECT distinct t.id, t.price, t.amount, t.spread_price
             FROM account a
@@ -331,7 +336,7 @@ CREATE OR REPLACE PACKAGE BODY se_core AS
         );
     EXCEPTION
         WHEN no_data_found THEN 
-            dbms_output.put_line('Ticker not found.');
+            dbms_output.put_line('Ticker or account not found.');
         WHEN others THEN
             se_utils.exception_fallback;
     END calculate_fees;

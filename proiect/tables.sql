@@ -25,7 +25,8 @@ create table holder (
     -- social security number/registration number
     legal_id         /*thing_name*/      varchar2(64) not null,
     legal_name       /*long_thing_name*/ varchar2(256) not null,
-    legal_status     /*type_string*/     varchar2(16) not null check (legal_status in ('PERSON', 'COMPANY')),
+    legal_status     /*type_string*/     varchar2(16) not null 
+        check (legal_status in ('PERSON', 'COMPANY')),
     physical_address /*long_thing_name*/ varchar2(256) not null,
     billing_address  /*long_thing_name*/ varchar2(256) not null,
     email            /*thing_name*/      varchar2(64) unique not null,
@@ -77,9 +78,12 @@ create table own (
 create table quotation (
     id /*id*/ integer not null,
 
-    type      /*type_string*/ varchar2(16) not null check (type in ('ASK', 'BID')),
-    fulfilled /*status*/      char default 0 not null check (fulfilled in (0, 1)),
-    deleted   /*status*/      char default 0 not null check (deleted in (0, 1)),
+    type      /*type_string*/ varchar2(16) not null 
+        check (type in ('ASK', 'BID')),
+    fulfilled /*status*/      char default 0 not null 
+        check (fulfilled in (0, 1)),
+    deleted   /*status*/      char default 0 not null 
+        check (deleted in (0, 1)),
 
     ticker     /*abbreviation*/ varchar2(10) not null,
     account_id /*id*/           integer not null,
@@ -182,8 +186,10 @@ create table stock_security (
         foreign key (ticker)
         references security(ticker),
     
-    type           /*type_string*/ varchar2(16) not null check (type in ('COMMON', 'PREFERRED')),
-    pays_dividents /*status*/      char default 0 not null check (pays_dividents in (0, 1))
+    type           /*type_string*/ varchar2(16) not null 
+        check (type in ('COMMON', 'PREFERRED')),
+    pays_dividents /*status*/      char default 0 not null 
+        check (pays_dividents in (0, 1))
 );
 
 create table fund_security (
@@ -193,7 +199,8 @@ create table fund_security (
         foreign key (ticker)
         references security(ticker),
     
-    type /*type_string*/ varchar2(16) not null check (type in ('HEDGE', 'MUTUAL', 'BOND'))
+    type /*type_string*/ varchar2(16) not null
+        check (type in ('HEDGE', 'MUTUAL', 'BOND'))
 );
 
 create table bond_security (
@@ -203,5 +210,6 @@ create table bond_security (
         foreign key (ticker)
         references security(ticker),
     
-    interest_rate /*percentage*/ number(5, 3) not null check (interest_rate >= 0.01)
+    interest_rate /*percentage*/ number(5, 3) not null 
+        check (interest_rate >= 0.01)
 );
