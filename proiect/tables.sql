@@ -115,12 +115,9 @@ create table trade (
     ask_id /*id*/ integer not null,
     bid_id /*id*/ integer not null,
 
-    asker_account_id        /*id*/ integer not null,
-    bidder_account_id       /*id*/ integer not null,
     market_maker_account_id /*id*/ integer not null,
     time timestamp with time zone,
     
-    ticker       /*abbreviation*/ varchar2(10) not null,
     amount       /*quantity*/     number(15) not null,
     price        /*quantity*/     number(15) not null,
     spread_price /*quantity*/     number(15) not null,
@@ -134,19 +131,9 @@ create table trade (
         foreign key (bid_id)
         references quotation(id),
         
-    constraint asker_account_fk
-        foreign key (asker_account_id)
-        references account(id),
-    constraint bidder_account_fk
-        foreign key (bidder_account_id)
-        references account(id),
     constraint market_maker_account_fk
         foreign key (market_maker_account_id)
-        references account(id),
-    
-    constraint traded_asset_fk
-        foreign key (ticker)
-        references security(ticker)
+        references account(id)
 );
 
 create sequence trade_ids start with 1;

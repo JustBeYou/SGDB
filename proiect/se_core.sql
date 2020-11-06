@@ -303,9 +303,15 @@ CREATE OR REPLACE PACKAGE BODY se_core AS
             threshold_fee_pair(se_utils.dollars_to_points(100000), 0.1)
         );
         
-        SELECT SUM((t.price + t.spread_price) * t.amount) INTO volume
-        FROM trade t
-        WHERE t.asker_account_id = acc_id OR t.bidder_account_id = acc_id;
+        SELECT SUM((price + spread_price) * amount) INTO volume
+        FROM (
+            SELECT distinct t.id, t.price, t.amount, t.spread_price
+            FROM account a
+            INNER JOIN quotation q 
+            ON q.account_id = acc_id
+            INNER JOIN trade t
+            ON (t.ask_id = q.id OR t.bid_id = q.id)
+        );
         
         FOR i IN 1 .. thresholds.count LOOP
             IF (thresholds(i).above(volume) = 1) THEN
@@ -424,22 +430,16 @@ CREATE OR REPLACE PACKAGE BODY se_core AS
         INSERT INTO trade (
             ask_id, 
             bid_id, 
-            asker_account_id, 
-            bidder_account_id,
             market_maker_account_id,
             time,
-            ticker,
             amount,
             price,
             spread_price
         ) VALUES (
             ask.id,
             bid.id,
-            ask.account_id,
-            bid.account_id,
             default_market_acc_id,
             CURRENT_TIMESTAMP,
-            bid.ticker,
             shares_to_transfer,
             trade_price,    
             spread
